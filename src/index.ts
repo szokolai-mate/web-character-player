@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { VRMCharacter } from './VRMCharacter';
+//tmp
+import TWEEN from '@tweenjs/tween.js';
 
 // Set up scene
 const scene = new THREE.Scene();
@@ -34,40 +37,49 @@ document.body.appendChild(renderer.domElement);
 
 // Initialize model loader
 const modelLoader = new ModelLoader();
-// global vrm
-let vrm: any = null;
+let characters: VRMCharacter[] = [];
+//tmp
+var dX = 0;
 
-//Load FBX model
-modelLoader.load('HatsuneMikuNT.vrm')
-    .then(model => {
-      console.log(model)
-      scene.add(model[0][0]);
-
-      vrm = model[1].vrm;
-      console.log(vrm.expressionManager)
-      vrm.expressionManager.setValue('aa', 1.0);
-      vrm.expressionManager.setValue('ih', 1.0);
-    })
-    .catch(error => {
-        console.error('Error loading model:', error);
-        // Fallback to default cube
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        scene.add(new THREE.Mesh(geometry, material));
-    });
+for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
+  modelLoader.load(filename)
+      .then(model => {
+        const character = new VRMCharacter(model[0][0], model[1].vrm);
+        characters.push(character);
+        character.vrm.expressionManager.setValue('aa', 1.0);
+        character.vrm.expressionManager.setValue('ih', 1.0);
+        character.scene.position.x += dX;
+        dX += 2; // Increment x position for next model
+        character.tweens.add(new TWEEN.Tween(character.scene.scale)
+            .to({ y: 2 }, 5000).easing(TWEEN.Easing.Cubic.InOut).start().onComplete(()=>{
+              console.log('Scale animation completed');
+            }))
+          // Add the model to the scene
+        scene.add(character.scene);
+      })
+      .catch(error => {
+          console.error('Error loading model:', error);
+          // Fallback to default cube
+          const geometry = new THREE.BoxGeometry();
+          const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+          scene.add(new THREE.Mesh(geometry, material));
+      });
+}
 
 camera.position.z = 5;
 let clock = new THREE.Clock();
 clock.start();
 
 // Animation loop
-function animate() {
+function animate(time: number) {
   requestAnimationFrame(animate);
-    const deltaTime = clock.getDelta();
-    if (vrm != null)
-      vrm.update(deltaTime)
-    controls.update();
-    renderer.render(scene, camera);
+  const deltaTime = clock.getDelta();
+  for (const character of characters) {
+    character.vrm.update(deltaTime)
+    character.tweens.update();
+  }
+  controls.update();
+  renderer.render(scene, camera);
 }
 
 // Handle window resize
@@ -78,4 +90,4 @@ window.addEventListener('resize', () => {
 });
 
 // Start animation
-animate();
+requestAnimationFrame(animate);
