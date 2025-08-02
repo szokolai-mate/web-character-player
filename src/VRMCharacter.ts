@@ -12,6 +12,7 @@ export class VRMCharacter extends Character {
         this.vrm = vrm;
         this.setUpMouthTweens();
         this.setUpBlinking();
+        this.unTPose();
     }
 
     public override update(dT: number): void {
@@ -19,13 +20,35 @@ export class VRMCharacter extends Character {
         this.vrm.update(dT)
     }
 
-    public createExpressionTween(name: string, weight: number, time: number, curve: (a: number) => number = Easing.Sinusoidal.InOut ): Tween | null {
+    public unTPose(): void {
+        const h = this.vrm.humanoid;
+        let bone1 = h.getNormalizedBoneNode("rightUpperArm");
+        let bone2 = h.getNormalizedBoneNode("rightLowerArm");
+        let bone3 = h.getNormalizedBoneNode("leftUpperArm");
+        let bone4 = h.getNormalizedBoneNode("leftLowerArm");
+        if (bone1 && bone2 && bone3 && bone4) {
+            if (this.vrm.meta?.metaVersion === '1') {
+                bone1.rotation.z = -250;
+                bone2.rotation.z = 0.2;
+                bone3.rotation.z = 250;
+                bone4.rotation.z = -0.2;
+            }
+            else {
+                bone1.rotation.z = 250;
+                bone2.rotation.z = -0.2;
+                bone3.rotation.z = -250;
+                bone4.rotation.z = 0.2;
+            }
+        }
+    }
+
+    public createExpressionTween(name: string, weight: number, time: number, curve: (a: number) => number = Easing.Sinusoidal.InOut): Tween | null {
         if (this.vrm.expressionManager) {
             const expression = this.vrm.expressionManager.getExpression(name);
             if (expression) {
                 const t = new Tween(expression)
-                .to({ weight: weight }, time)
-                .easing(curve)
+                    .to({ weight: weight }, time)
+                    .easing(curve)
                 return t;
             }
         }
@@ -76,5 +99,5 @@ export class VRMCharacter extends Character {
                 }
             }
         }
-    }    
+    }
 }
