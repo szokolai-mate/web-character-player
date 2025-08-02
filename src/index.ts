@@ -2,8 +2,6 @@ import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { VRMCharacter } from './VRMCharacter';
-//tmp
-import TWEEN from '@tweenjs/tween.js';
 
 // Set up scene
 const scene = new THREE.Scene();
@@ -46,15 +44,9 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
       .then(model => {
         const character = new VRMCharacter(model[0][0], model[1].vrm);
         characters.push(character);
-        character.vrm.expressionManager.setValue('aa', 1.0);
-        character.vrm.expressionManager.setValue('ih', 1.0);
         character.scene.position.x += dX;
         dX += 2; // Increment x position for next model
-        character.tweens.add(new TWEEN.Tween(character.scene.scale)
-            .to({ y: 2 }, 5000).easing(TWEEN.Easing.Cubic.InOut).start().onComplete(()=>{
-              console.log('Scale animation completed');
-            }))
-          // Add the model to the scene
+        character.setUpBlinking();
         scene.add(character.scene);
       })
       .catch(error => {
@@ -66,7 +58,8 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
       });
 }
 
-camera.position.z = 5;
+camera.position.z = -2;
+camera.position.y = 2;
 let clock = new THREE.Clock();
 clock.start();
 
@@ -75,8 +68,7 @@ function animate(time: number) {
   requestAnimationFrame(animate);
   const deltaTime = clock.getDelta();
   for (const character of characters) {
-    character.vrm.update(deltaTime)
-    character.tweens.update();
+    character.update(deltaTime);
   }
   controls.update();
   renderer.render(scene, camera);
