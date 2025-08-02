@@ -4,7 +4,7 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 // TODO: not sure if this MMDLoader has full functionality, like morph parsing
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { VRMLoaderPlugin } from '@pixiv/three-vrm';
+import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 
 export class ModelLoader {
     private static readonly LOGPREFIX = "[ModelLoader]"
@@ -24,6 +24,13 @@ export class ModelLoader {
                 this.loader.load(
                     url,
                     (model) => {
+                        // TODO: these "fixes" mention morph, might lead to problems later
+                        // calling these functions greatly improves the performance
+                        VRMUtils.combineMorphs( model.userData.vrm );
+                        for (const scene of model.scenes) {
+                            VRMUtils.removeUnnecessaryVertices( model.scene );
+                            VRMUtils.combineSkeletons( model.scene );
+                        }
                         resolve([model.scenes, model.userData]);
                     },
                     ModelLoader.progressFunctor,
