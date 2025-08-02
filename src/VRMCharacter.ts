@@ -1,4 +1,3 @@
-import { randFloat, randInt } from "three/src/math/MathUtils";
 import { Character } from "./Character";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import { VRMCore } from "@pixiv/three-vrm";
@@ -11,6 +10,8 @@ export class VRMCharacter extends Character {
     constructor(scene: THREE.Object3D, vrm: VRMCore) {
         super(scene);
         this.vrm = vrm;
+        this.setUpMouthTweens();
+        this.setUpBlinking();
     }
 
     public override update(dT: number): void {
@@ -47,13 +48,16 @@ export class VRMCharacter extends Character {
         // TODO: error
     }
 
-    public onBlinkDown(curr: Tween, next: Tween) {
-        curr.duration(randInt(50, 250))
-        next.delay(randInt(20, 200)).startFromCurrentValues();
-    }
-
-    public onBlinkUp(curr: Tween, next: Tween) {
-        curr.duration(randInt(100, 350))
-        next.delay(randInt(200, 1800)).startFromCurrentValues();
-    }
+    private setUpMouthTweens(): void {
+        const manager = this.vrm.expressionManager
+        if (manager) {
+            for (const expName of manager.mouthExpressionNames) {
+                const t = this.tweenExpression(expName, 0.0, 100, Easing.Quintic.Out);
+                if (t) {
+                    this.mouthTweens.add(t);
+                    this.mouthTweenMap.set(expName, t);
+                }
+            }
+        }
+    }    
 }

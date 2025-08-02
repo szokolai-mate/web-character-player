@@ -46,7 +46,7 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
         characters.push(character);
         character.scene.position.x += dX;
         dX += 2; // Increment x position for next model
-        character.setUpBlinking();
+        character.setUpInfiniteTalk();
         scene.add(character.scene);
       })
       .catch(error => {
