@@ -35,6 +35,9 @@ export class Character {
     }
 
     //TODO: timescale and weight of animation could be useful for user finetuning
+    //Note: negative timescale plays it backwards
+    //Note: clamp will pause on the last frame
+    //Note: multiple animations can play at the same time and they will be mixed 
     public async playAnimation(url: string): Promise<void> {
         const clip = AnimationClip.findByName(this.loadedAnimations, url);
         if (clip) {

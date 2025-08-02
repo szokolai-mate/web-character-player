@@ -14,7 +14,6 @@ import { VRMCharacter } from './VRMCharacter';
 // connecting to the expression classification
 // TODO: improvements
 // check is VRM 1.0 expression exports can affect materials and uv or not
-// mixing multiple expressions and animations
 // document
 
 // Set up scene
@@ -61,6 +60,7 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm', 'Untitled impv1
         characters.push(character);
         character.scene.position.x += dX;
         dX += 2; // Increment x position for next model
+        character.playAnimation("animation/action_run.bvh");
         character.playAnimation("animation/exercise_jumping_jacks.bvh");
         character.setUpInfiniteTalk();
         character.tweenExpression("happy", 0.5, 5000);
