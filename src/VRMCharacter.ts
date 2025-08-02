@@ -20,6 +20,16 @@ export class VRMCharacter extends Character {
         this.vrm.update(dT)
     }
 
+    /**
+     * Sets the target to look at.
+     * @param target - The target to look at. If null, tracking will be disabled.
+     */
+    public setLookAt(target: THREE.Object3D | null): void {
+        if (this.vrm.lookAt) {
+            this.vrm.lookAt.target = target;
+        }
+    }
+
     public unTPose(): void {
         const h = this.vrm.humanoid;
         let bone1 = h.getNormalizedBoneNode("rightUpperArm");
