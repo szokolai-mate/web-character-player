@@ -3,6 +3,20 @@ import { ModelLoader } from './ModelLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { VRMCharacter } from './VRMCharacter';
 
+// TODO: stuff to see in old extension
+// hitboxes
+// renderer and camera settings
+// controls seems custom?
+// frustum culling??
+// connect both text talk and audio talk
+// possibly streaming talk, ie dont just start at the end of the message
+// 3d background?
+// connecting to the expression classification
+// TODO: improvements
+// check is VRM 1.0 expression exports can affect materials and uv or not
+// mixing multiple expressions and animations
+// document
+
 // Set up scene
 const scene = new THREE.Scene();
 // Add lights
@@ -28,6 +42,8 @@ const axesHelper = new THREE.AxesHelper(10);
 scene.add(axesHelper);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 2;
+camera.position.y = 2;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -38,8 +54,7 @@ const modelLoader = new ModelLoader();
 let characters: VRMCharacter[] = [];
 //tmp
 var dX = 0;
-
-for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
+for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm', 'Untitled impv1.vrm']) {
   modelLoader.load(filename)
       .then(model => {
         const character = new VRMCharacter(model[0][0], model[1].vrm);
@@ -48,7 +63,8 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
         dX += 2; // Increment x position for next model
         character.playAnimation("animation/exercise_jumping_jacks.bvh");
         character.setUpInfiniteTalk();
-        character.tweenExpression("happy", 1.0, 15000);
+        character.tweenExpression("happy", 0.5, 5000);
+        character.setLookAt(camera);
         scene.add(character.scene);
       })
       .catch(error => {
@@ -60,8 +76,6 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
       });
 }
 
-camera.position.z = -2;
-camera.position.y = 2;
 let clock = new THREE.Clock();
 clock.start();
 
