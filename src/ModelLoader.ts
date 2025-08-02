@@ -31,6 +31,7 @@ export class ModelLoader {
                             VRMUtils.removeUnnecessaryVertices( model.scene );
                             VRMUtils.combineSkeletons( model.scene );
                         }
+                        VRMUtils.rotateVRM0(model.userData.vrm);
                         resolve([model.scenes, model.userData]);
                     },
                     ModelLoader.progressFunctor,
