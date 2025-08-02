@@ -34,6 +34,7 @@ export class Character {
         next.delay(randInt(200, 1800)).startFromCurrentValues();
     }
 
+    //TODO: timescale and weight of animation could be useful for user finetuning
     public async playAnimation(url: string): Promise<void> {
         const clip = AnimationClip.findByName(this.loadedAnimations, url);
         if (clip) {
