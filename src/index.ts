@@ -46,6 +46,7 @@ for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm']) {
         characters.push(character);
         character.scene.position.x += dX;
         dX += 2; // Increment x position for next model
+        character.playAnimation("animation/exercise_jumping_jacks.bvh");
         character.setUpInfiniteTalk();
         character.tweenExpression("happy", 1.0, 15000);
         scene.add(character.scene);

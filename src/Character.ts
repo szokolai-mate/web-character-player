@@ -1,20 +1,25 @@
 import { randFloat, randInt } from "three/src/math/MathUtils";
+import { AnimationLoader } from './AnimationLoader';
 import { Group as TweenGroup, Tween, Easing } from '@tweenjs/tween.js';
+import { AnimationClip, AnimationMixer } from "three";
 
 export class Character {
     public scene: THREE.Object3D;
-    protected tweens: TweenGroup;
-    protected mouthTweens: TweenGroup;
-    protected mouthTweenMap: Map<string, Tween>;
+    protected animationMixer: AnimationMixer;
+    protected loadedAnimations: AnimationClip[] = []; 
+    protected animationLoader: AnimationLoader = new AnimationLoader();
+    protected tweens: TweenGroup = new TweenGroup();
+    protected mouthTweens: TweenGroup =  new TweenGroup();
+    protected mouthTweenMap: Map<string, Tween> = new Map<string, Tween>();
 
     constructor(scene: THREE.Object3D) {
         this.scene = scene;
-        this.tweens = new TweenGroup();
-        this.mouthTweens = new TweenGroup();
-        this.mouthTweenMap = new Map<string, Tween>();
+        this.animationMixer = new AnimationMixer(this.scene)
+        // TODO: clips = scene.animations, scene could contain animations
     }
 
     public update(dT: number): void {
+        this.animationMixer.update(dT)
         this.tweens.update()
         this.mouthTweens.update()
     }
@@ -27,6 +32,23 @@ export class Character {
     public onBlinkUp(curr: Tween, next: Tween) {
         curr.duration(randInt(100, 350))
         next.delay(randInt(200, 1800)).startFromCurrentValues();
+    }
+
+    public async playAnimation(url: string): Promise<void> {
+        const clip = AnimationClip.findByName(this.loadedAnimations, url);
+        if (clip) {
+            this.animationMixer.clipAction(clip).play();
+        }
+        // lazy loading
+        //TODO error
+        else {
+            await this.loadAnimation(url);
+            this.playAnimation(url);
+        }
+    }
+
+    protected async loadAnimation(url: string) {
+        //TODO: this class should be an interface
     }
 
     //tmp

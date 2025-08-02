@@ -44,6 +44,11 @@ export class VRMCharacter extends Character {
         //TODO error
     }
 
+    protected override async loadAnimation(url: string) {
+        //TODO error
+        this.loadedAnimations.push(await this.animationLoader.BHVforVRM(url, this.vrm));
+    }
+
     private setUpBlinking(): void {
         const blinkDown = this.createExpressionTween("blink", 1.0, 130, Easing.Quintic.In);
         const blinkUp = this.createExpressionTween("blink", this.minBlink, 220, Easing.Back.Out);
