@@ -19,7 +19,7 @@ export class VRMCharacter extends Character {
         this.vrm.update(dT)
     }
 
-    public tweenExpression(name: string, weight: number, time: number, curve: (a: number) => number ): Tween | null {
+    public createExpressionTween(name: string, weight: number, time: number, curve: (a: number) => number = Easing.Sinusoidal.InOut ): Tween | null {
         if (this.vrm.expressionManager) {
             const expression = this.vrm.expressionManager.getExpression(name);
             if (expression) {
@@ -32,9 +32,21 @@ export class VRMCharacter extends Character {
         return null;
     }
 
-    public setUpBlinking(): void {
-        const blinkDown = this.tweenExpression("blink", 1.0, 130, Easing.Quintic.In);
-        const blinkUp = this.tweenExpression("blink", this.minBlink, 220, Easing.Back.Out);
+    public tweenExpression(name: string, weight: number, time: number, curve: (a: number) => number = Easing.Sinusoidal.InOut): void {
+        const t = this.createExpressionTween(name, weight, time, curve);
+        if (t) {
+            t.onComplete(() => {
+                this.tweens.remove(t);
+            });
+            t.start();
+            this.tweens.add(t);
+        }
+        //TODO error
+    }
+
+    private setUpBlinking(): void {
+        const blinkDown = this.createExpressionTween("blink", 1.0, 130, Easing.Quintic.In);
+        const blinkUp = this.createExpressionTween("blink", this.minBlink, 220, Easing.Back.Out);
         if (blinkUp && blinkDown) {
             blinkDown.onComplete(() => {
                 this.onBlinkDown(blinkDown, blinkUp);
@@ -52,7 +64,7 @@ export class VRMCharacter extends Character {
         const manager = this.vrm.expressionManager
         if (manager) {
             for (const expName of manager.mouthExpressionNames) {
-                const t = this.tweenExpression(expName, 0.0, 100, Easing.Quintic.Out);
+                const t = this.createExpressionTween(expName, 0.0, 100, Easing.Quintic.Out);
                 if (t) {
                     this.mouthTweens.add(t);
                     this.mouthTweenMap.set(expName, t);
