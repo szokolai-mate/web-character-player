@@ -10,7 +10,7 @@
         "strict": true,
         "esModuleInterop": true,
         "sourceMap": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": false
     },
     "include": ["src/**/*"],
     "exclude": [

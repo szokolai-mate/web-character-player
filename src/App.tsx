@@ -7,7 +7,8 @@ import { VRMCore } from '@pixiv/three-vrm';
 
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import MainScene from './scenes/MainScene';
+import { Loader, Html } from '@react-three/drei';
+import { CustomModel } from './components/CustomModel';
 // import ModelScene from './components/ModelScene';
 // import LoadingScreen from './components/LoadingScreen';
 // import ControlPanel from './components/ControlPanel';
@@ -31,19 +32,6 @@ import MainScene from './scenes/MainScene';
 // multi-character management (load, cleanup etc)
 
 export default function App() {
-    const characters: VRMCharacter[] = []; // Load characters here
-    const modelLoader = new ModelLoader();
-    for (const filename of ['assets/HatsuneMikuNT.vrm']) {
-    modelLoader.load(filename)
-        .then(model => {
-            const character = new VRMCharacter(model[0][0], model[1].vrm as VRMCore);
-            characters.push(character);
-            character.playAnimation('assets/animation/action_run.bvh');
-            character.playAnimation('assets/animation/exercise_jumping_jacks.bvh');
-            character.setUpInfiniteTalk();
-            character.tweenExpression('happy', 0.5, 5000);
-        })
-    }
     return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       <Canvas
@@ -54,8 +42,12 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-            <MainScene color='blue' characters={characters}/>
+            {/* <MainScene color='blue' characters={characters}/> */}
+            <CustomModel url='assets/HatsuneMikuNT.vrm'/>
         </Suspense>
+        <Html center>
+            <Loader />
+        </Html>
       </Canvas>
     </div>
   );
