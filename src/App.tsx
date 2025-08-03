@@ -28,10 +28,14 @@ import { CustomModel } from './components/CustomModel';
 // good interface for mixing expressions and animations, with parameters
 // -> i will need React
 // web workers for loading?
-// React Three Fiber?
+// migrate to React Three Fiber, meshes, animation, everything
 // multi-character management (load, cleanup etc)
+// AnimationUtils.subclip and other good stuff in Three animation calsses (like fade)
+// Use errorboundry for suspense
+// Look through Drei, it has a lot of good stuff
 
 export default function App() {
+    const modelPromise = new ModelLoader().load('assets/HatsuneMikuNT.vrm')
     return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       <Canvas
@@ -43,7 +47,7 @@ export default function App() {
       >
         <Suspense fallback={null}>
             {/* <MainScene color='blue' characters={characters}/> */}
-            <CustomModel url='assets/HatsuneMikuNT.vrm'/>
+            <CustomModel modelPromise={modelPromise}/>
         </Suspense>
         <Html center>
             <Loader />

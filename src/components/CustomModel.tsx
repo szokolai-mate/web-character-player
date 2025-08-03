@@ -1,15 +1,14 @@
-import { useRef } from 'react';
+import { useRef, use } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useModelLoader } from '../hooks/useModelLoader';
 
 interface CustomModelProps {
-    url: string;
+    modelPromise: Promise<[THREE.Object3D[], Record<string, unknown>]>;
     position?: [number, number, number];
     scale?: [number, number, number];
 }
 
-export function CustomModel({ url, position = [0, 0, 0], scale = [1, 1, 1] }: CustomModelProps) {
-    const model = useModelLoader(url);
+export function CustomModel({ modelPromise, position = [0, 0, 0], scale = [1, 1, 1] }: CustomModelProps) {
+    const model = use(modelPromise);
     const ref = useRef<THREE.Object3D>(null);
 
     useFrame(() => {
