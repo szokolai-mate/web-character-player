@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three-stdlib';
 import { VRMCharacter } from './VRMCharacter';
 
 // TODO: stuff to see in old extension

@@ -1,7 +1,7 @@
-const config = require('./webpack.config');
-const { merge } = require('webpack-merge');
+import baseConfig from './webpack.config.js';
+import { merge } from 'webpack-merge'; 
 
-module.exports = merge(config, {
+export default merge(baseConfig, {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {

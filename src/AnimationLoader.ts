@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BVHLoader } from 'three/examples/jsm/loaders/BVHLoader';
+import { BVHLoader } from 'three-stdlib';
 import { VRMCore, VRMHumanBoneName } from '@pixiv/three-vrm';
 
 export class AnimationLoader {

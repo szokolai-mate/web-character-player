@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 // TODO: implement FBX support
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+import { FBXLoader } from 'three-stdlib';
 // TODO: not sure if this MMDLoader has full functionality, like morph parsing
 import { MMDLoader } from "three/examples/jsm/loaders/MMDLoader.js";
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+// TODO: this import causes type mismatch
+//import { GLTFLoader } from 'three-stdlib';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 
 export class ModelLoader {
