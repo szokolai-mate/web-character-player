@@ -1,3 +1,4 @@
+import './style.css'
 import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
 import { OrbitControls } from 'three-stdlib';
@@ -18,6 +19,8 @@ import { VRMCore } from '@pixiv/three-vrm';
 // document
 // good interface for mixing expressions and animations, with parameters
 // multi-character management (load, cleanup etc)
+
+console.log("#################### MY EXTENSION LOADED! ####################");
 
 
 // Set up scene
@@ -49,6 +52,7 @@ camera.position.z = 2;
 camera.position.y = 2;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.domElement.id = "MY-DEV-canvas"
 const controls = new OrbitControls(camera, renderer.domElement);
 document.body.appendChild(renderer.domElement);
 
