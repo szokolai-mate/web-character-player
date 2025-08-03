@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
 import { OrbitControls } from 'three-stdlib';
 import { VRMCharacter } from './VRMCharacter';
+import { VRMCore } from '@pixiv/three-vrm';
 
 // TODO: stuff to see in old extension
 // hitboxes
@@ -15,6 +16,9 @@ import { VRMCharacter } from './VRMCharacter';
 // TODO: improvements
 // check is VRM 1.0 expression exports can affect materials and uv or not
 // document
+// good interface for mixing expressions and animations, with parameters
+// multi-character management (load, cleanup etc)
+
 
 // Set up scene
 const scene = new THREE.Scene();
@@ -56,7 +60,7 @@ let dX = 0;
 for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm', 'Untitled impv1.vrm']) {
     modelLoader.load(filename)
         .then(model => {
-            const character = new VRMCharacter(model[0][0], model[1].vrm);
+            const character = new VRMCharacter(model[0][0], model[1].vrm as VRMCore);
             characters.push(character);
             character.scene.position.x += dX;
             dX += 2; // Increment x position for next model
