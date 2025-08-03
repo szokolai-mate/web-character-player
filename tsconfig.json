@@ -1,19 +1,18 @@
 {
     "compilerOptions": {
-        "target": "ES6",
+        "jsx": "react-jsx",
+        "target": "ESNext",
         "module": "ESNext",
-        "moduleResolution": "Bundler",
+        "moduleResolution": "node",
         "outDir": "./out",
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "skipLibCheck": true,
         "strict": true,
         "esModuleInterop": true,
         "sourceMap": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "globals.d.ts"
-    ],
+    "include": ["src/**/*"],
     "exclude": [
         "node_modules",
         "dist",

@@ -1,9 +1,16 @@
 import './style.css';
 import * as THREE from 'three';
-import { ModelLoader } from './ModelLoader';
+import { ModelLoader } from './loaders/ModelLoader';
 import { OrbitControls } from 'three-stdlib';
-import { VRMCharacter } from './VRMCharacter';
+import { VRMCharacter } from './classes/VRMCharacter';
 import { VRMCore } from '@pixiv/three-vrm';
+
+import React, { Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import MainScene from './scenes/MainScene';
+// import ModelScene from './components/ModelScene';
+// import LoadingScreen from './components/LoadingScreen';
+// import ControlPanel from './components/ControlPanel';
 
 // TODO: stuff to see in old extension
 // hitboxes
@@ -18,11 +25,45 @@ import { VRMCore } from '@pixiv/three-vrm';
 // check is VRM 1.0 expression exports can affect materials and uv or not
 // document
 // good interface for mixing expressions and animations, with parameters
+// -> i will need React
+// web workers for loading?
+// React Three Fiber?
 // multi-character management (load, cleanup etc)
+
+export default function App() {
+    const characters: VRMCharacter[] = []; // Load characters here
+    const modelLoader = new ModelLoader();
+    for (const filename of ['assets/HatsuneMikuNT.vrm']) {
+    modelLoader.load(filename)
+        .then(model => {
+            const character = new VRMCharacter(model[0][0], model[1].vrm as VRMCore);
+            characters.push(character);
+            character.playAnimation('assets/animation/action_run.bvh');
+            character.playAnimation('assets/animation/exercise_jumping_jacks.bvh');
+            character.setUpInfiniteTalk();
+            character.tweenExpression('happy', 0.5, 5000);
+        })
+    }
+    return (
+    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 50 }}
+        gl={{ antialias: true }}
+        onCreated={({ gl }) => {
+          gl.setClearColor('#242424');
+        }}
+      >
+        <Suspense fallback={null}>
+            <MainScene color='blue' characters={characters}/>
+        </Suspense>
+      </Canvas>
+    </div>
+  );
+}
 
 console.log("#################### MY EXTENSION LOADED! ####################");
 
-
+/*
 // Set up scene
 const scene = new THREE.Scene();
 // Add lights
@@ -107,3 +148,4 @@ window.addEventListener('resize', () => {
 
 // Start animation
 requestAnimationFrame(animate);
+*/
