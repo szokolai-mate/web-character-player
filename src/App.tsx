@@ -8,10 +8,7 @@ import { VRMCore } from '@pixiv/three-vrm';
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader, Html } from '@react-three/drei';
-import { CustomModel } from './components/CustomModel';
-// import ModelScene from './components/ModelScene';
-// import LoadingScreen from './components/LoadingScreen';
-// import ControlPanel from './components/ControlPanel';
+import MainScene from './scenes/MainScene';
 
 // TODO: stuff to see in old extension
 // hitboxes
@@ -33,21 +30,19 @@ import { CustomModel } from './components/CustomModel';
 // AnimationUtils.subclip and other good stuff in Three animation calsses (like fade)
 // Use errorboundry for suspense
 // Look through Drei, it has a lot of good stuff
+// Extension is now not loading due to Fiber, need to inject, see React Extension template
 
 export default function App() {
-    const modelPromise = new ModelLoader().load('assets/HatsuneMikuNT.vrm')
     return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 50 }}
+        camera={{ position: [0, 2, 2], fov: 75 }}
         gl={{ antialias: true }}
         onCreated={({ gl }) => {
           gl.setClearColor('#242424');
-        }}
-      >
+        }}>
         <Suspense fallback={null}>
-            {/* <MainScene color='blue' characters={characters}/> */}
-            <CustomModel modelPromise={modelPromise}/>
+            <MainScene color='blue' urls={['assets/HatsuneMikuNT.vrm', 'assets/Untitled imp.vrm']}/>
         </Suspense>
         <Html center>
             <Loader />
@@ -58,41 +53,7 @@ export default function App() {
 }
 
 console.log("#################### MY EXTENSION LOADED! ####################");
-
 /*
-// Set up scene
-const scene = new THREE.Scene();
-// Add lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(1, 1, 1);
-scene.add(directionalLight);
-
-const keyLight = new THREE.DirectionalLight(0xffffff, 1);
-keyLight.position.set(10, 15, 10);
-scene.add(keyLight);
-
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
-fillLight.position.set(0, 10, -10);
-scene.add(fillLight);
-
-// Helpers (optional)
-const gridHelper = new THREE.GridHelper(30, 30, 0x303030, 0x303030);
-scene.add(gridHelper);
-const axesHelper = new THREE.AxesHelper(10);
-scene.add(axesHelper);
-
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 2;
-camera.position.y = 2;
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.domElement.id = "MY-DEV-canvas"
-const controls = new OrbitControls(camera, renderer.domElement);
-document.body.appendChild(renderer.domElement);
-
 // Initialize model loader
 const modelLoader = new ModelLoader();
 const characters: VRMCharacter[] = [];
@@ -131,17 +92,5 @@ function animate(time: number) {
     for (const character of characters) {
         character.update(deltaTime);
     }
-    controls.update();
-    renderer.render(scene, camera);
 }
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// Start animation
-requestAnimationFrame(animate);
 */
