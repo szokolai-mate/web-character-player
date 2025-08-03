@@ -9,7 +9,10 @@ export default merge(baseConfig, {
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
-        static: ['./dist', './assets'],
+        static: {
+            directory: path.join(__dirname, './assets'),
+            publicPath: '/assets',
+        },
         port: 3000,
     },
     plugins: [

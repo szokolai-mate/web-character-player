@@ -1,0 +1,12 @@
+{
+    "display_name": "3d model DEV",
+    "loading_order": 15,
+    "requires": [],
+    "optional": [],
+    "js": "dist/main.js",
+    "css": "dist/main.css",
+    "author": "",
+    "version": "1.0.0",
+    "homePage": "",
+    "auto_update": true
+}

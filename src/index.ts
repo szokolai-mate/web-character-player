@@ -1,4 +1,4 @@
-import './style.css'
+import './style.css';
 import * as THREE from 'three';
 import { ModelLoader } from './ModelLoader';
 import { OrbitControls } from 'three-stdlib';
@@ -61,15 +61,15 @@ const modelLoader = new ModelLoader();
 const characters: VRMCharacter[] = [];
 //tmp
 let dX = 0;
-for (const filename of ['HatsuneMikuNT.vrm', 'Untitled imp.vrm', 'Untitled impv1.vrm']) {
+for (const filename of ['assets/HatsuneMikuNT.vrm', 'assets/Untitled imp.vrm', 'assets/Untitled impv1.vrm']) {
     modelLoader.load(filename)
         .then(model => {
             const character = new VRMCharacter(model[0][0], model[1].vrm as VRMCore);
             characters.push(character);
             character.scene.position.x += dX;
             dX += 2; // Increment x position for next model
-            character.playAnimation('animation/action_run.bvh');
-            character.playAnimation('animation/exercise_jumping_jacks.bvh');
+            character.playAnimation('assets/animation/action_run.bvh');
+            character.playAnimation('assets/animation/exercise_jumping_jacks.bvh');
             character.setUpInfiniteTalk();
             character.tweenExpression('happy', 0.5, 5000);
             character.setLookAt(camera);
