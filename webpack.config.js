@@ -41,16 +41,16 @@ export default {
         splitChunks: {
             chunks: 'all',
             cacheGroups: {
-            three: {
-                test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
-                name: 'three',
-                priority: 10,
-            },
-            react: {
-                test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-                name: 'react',
-                priority: 20,
-            },
+                three: {
+                    test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
+                    name: 'three',
+                    priority: 10,
+                },
+                react: {
+                    test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+                    name: 'react',
+                    priority: 20,
+                },
             },
         },
         minimizer: [

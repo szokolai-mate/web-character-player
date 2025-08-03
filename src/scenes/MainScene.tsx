@@ -9,7 +9,7 @@ interface MainSceneProps {
     //TODO
 }
 
-export default function MainScene({ color, urls = []}: MainSceneProps) {
+export default function MainScene({ color, urls = [] }: MainSceneProps) {
     const modelLoader = new ModelLoader();
     const modelPromises = [];
     for (const url of urls) {
@@ -31,7 +31,7 @@ export default function MainScene({ color, urls = []}: MainSceneProps) {
             </mesh>
             {modelPromises.map((item, index) => (
                 <Suspense fallback={null}>
-                    <CharacterModel modelPromise={item} position={[2*index, 0, 0]}/>
+                    <CharacterModel modelPromise={item} position={[2 * index, 0, 0]}/>
                 </Suspense>
             ))}
             <Stats />

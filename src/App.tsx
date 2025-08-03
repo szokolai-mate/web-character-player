@@ -29,22 +29,22 @@ import MainScene from './scenes/MainScene';
 
 export default function App() {
     return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      <Canvas
-        camera={{ position: [0, 2, 2], fov: 75 }}
-        gl={{ antialias: true }}
-        onCreated={({ gl }) => {
-          gl.setClearColor('#242424');
-        }}>
-        <Suspense fallback={null}>
-            <MainScene color='blue' urls={['assets/HatsuneMikuNT.vrm', 'assets/Untitled imp.vrm', 'assets/Untitled impv1.vrm']}/>
-        </Suspense>
-        <Html center>
-            <Loader />
-        </Html>
-      </Canvas>
-    </div>
-  );
+        <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+            <Canvas
+                camera={{ position: [0, 2, 2], fov: 75 }}
+                gl={{ antialias: true }}
+                onCreated={({ gl }) => {
+                    gl.setClearColor('#242424');
+                }}>
+                <Suspense fallback={null}>
+                    <MainScene color='blue' urls={['assets/HatsuneMikuNT.vrm', 'assets/Untitled imp.vrm', 'assets/Untitled impv1.vrm']}/>
+                </Suspense>
+                <Html center>
+                    <Loader />
+                </Html>
+            </Canvas>
+        </div>
+    );
 }
 
-console.log("#################### MY EXTENSION LOADED! ####################");
+console.log('#################### MY EXTENSION LOADED! ####################');

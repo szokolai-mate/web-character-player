@@ -1,5 +1,5 @@
 import { randInt, randFloat } from 'three/src/math/MathUtils.js';
-import { AnimationLoader } from '../loaders/AnimationLoader'
+import { AnimationLoader } from '../loaders/AnimationLoader';
 import { Group as TweenGroup, Tween, Easing } from '@tweenjs/tween.js';
 import { AnimationClip, AnimationMixer } from 'three';
 
