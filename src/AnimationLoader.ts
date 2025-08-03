@@ -20,7 +20,8 @@ export class AnimationLoader {
             const restRotationInverse = new THREE.Quaternion();
 
             for (const track of result.clip.tracks) {
-                const [vrmBoneName, propertyName] = track.name.split('.', 2);
+                const [empty, vrmBoneNameRaw, propertyName] = track.name.split('.', 3);
+                const vrmBoneName = vrmBoneNameRaw.split('[')[1].split(']')[0];
                 const vrmNode = vrm.humanoid?.getNormalizedBoneNode(vrmBoneName as VRMHumanBoneName);
                 if (!vrmNode?.name || !(vrmNode?.name)) continue;
                 const bvhBone = result.skeleton.getBoneByName(vrmBoneName);
