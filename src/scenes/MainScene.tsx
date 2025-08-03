@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
-import { CustomModel } from '../components/CustomModel';
 import { ModelLoader } from '../loaders/ModelLoader';
 import { Stats, OrbitControls } from '@react-three/drei';
+import { CharacterModel } from '../components/CharacterModel';
 
 interface MainSceneProps {
     color: string;
@@ -31,7 +31,7 @@ export default function MainScene({ color, urls = []}: MainSceneProps) {
             </mesh>
             {modelPromises.map((item, index) => (
                 <Suspense fallback={null}>
-                    <CustomModel modelPromise={item} position={[2*index, 0, 0]}/>
+                    <CharacterModel modelPromise={item} position={[2*index, 0, 0]}/>
                 </Suspense>
             ))}
             <Stats />
