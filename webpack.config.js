@@ -7,11 +7,12 @@ const __dirname = import.meta.dirname ?? path.dirname(fileURLToPath(import.meta.
 
 export default {
     entry: {
-        main: path.join(__dirname, 'src/index.tsx'),
+        index: path.join(__dirname, 'src/index.tsx'),
     },
     output: {
         path: path.join(__dirname, 'dist/'),
-        filename: '[name].js',
+        filename: 'index.js',
+        clean: true
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -38,21 +39,8 @@ export default {
     },
     plugins: [new MiniCssExtractPlugin()],
     optimization: {
-        splitChunks: {
-            chunks: 'all',
-            cacheGroups: {
-                three: {
-                    test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
-                    name: 'three',
-                    priority: 10,
-                },
-                react: {
-                    test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-                    name: 'react',
-                    priority: 20,
-                },
-            },
-        },
+        runtimeChunk: false,
+        splitChunks: false,
         minimizer: [
             new TerserPlugin({
                 extractComments: false,
