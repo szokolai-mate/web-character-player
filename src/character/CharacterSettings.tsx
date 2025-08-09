@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCharacterStore } from '../store';
 import { useShallow } from 'zustand/shallow';
 
@@ -11,10 +11,37 @@ function CharacterSettings({ characterId }: CharacterSettingsProps) {
         useShallow((state) => state.characters.find((char) => char.id === characterId)!));
     const { updateSetting, updatePosition, removeCharacter, toggleVisibility } = useCharacterStore.getState();
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+    const [isDeleteLocked, setIsDeleteLocked] = useState(false);
 
     if (!character) {
         return null;
     }
+
+    // This effect handles the confirmation timeout.
+    useEffect(() => {
+        // If we are not in confirm mode, there's nothing to do.
+        if (!isConfirmingDelete) return;
+        // Set a timer to automatically exit confirmation mode.
+        const timeoutId = setTimeout(() => {
+            setIsConfirmingDelete(false);
+        }, 3000);
+        // Cleanup function to clear the timer if the component unmounts
+        return () => clearTimeout(timeoutId);
+    }, [isConfirmingDelete]);
+
+    const handleRemoveClick = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent the card from collapsing.
+        if (isConfirmingDelete) {
+            removeCharacter(character.id);
+        } else {
+            // This is the first click, start the confirmation and the lock.
+            setIsConfirmingDelete(true);
+            setIsDeleteLocked(true);
+            // Unlock the button after a short cooldown.
+            setTimeout(() => setIsDeleteLocked(false), 500); // 500ms cooldown
+        }
+    };
 
     return (
         <div className={`character-settings-card ${isCollapsed ? 'collapsed' : ''}`}>
@@ -35,14 +62,12 @@ function CharacterSettings({ characterId }: CharacterSettingsProps) {
                         {character.settings.visible ? '👁️' : '🙈'}
                     </button>
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation(); // Prevent card from collapsing when clicking button
-                            removeCharacter(character.id);
-                        }}
-                        className="remove-button"
-                        title="Remove Character"
+                        onClick={handleRemoveClick}
+                        disabled={isDeleteLocked}
+                        className={`remove-button ${isConfirmingDelete ? 'confirming' : ''}`}
+                        title={isDeleteLocked ? '...' : (isConfirmingDelete ? 'Confirm Delete' : 'Remove Character')}
                     >
-                        &ndash;
+                        <span>🗑️</span>
                     </button>
                 </div>
             </h4>

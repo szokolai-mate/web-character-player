@@ -1,3 +1,24 @@
+@keyframes deplete {
+  from {
+    height: 100%;
+  }
+  to {
+    height: 0%;
+  }
+}
+
+@keyframes shake-and-rest {
+  /* Multiple sharp rotations in quick succession */
+  0%, 70%, 100% { transform: rotate(0); }
+  10% { transform: rotate(-15deg); }
+  20% { transform: rotate(12deg); }
+  30% { transform: rotate(-10deg); }
+  40% { transform: rotate(8deg); }
+  50% { transform: rotate(-6deg); }
+  60% { transform: rotate(4deg); }
+  /* --- The short rest phase (70% to 100%) --- */
+}
+
 .control-panel {
   width: 300px;
   background-color: #2a2a2a;
@@ -172,13 +193,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   transition: background-color 0.2s ease;
-}
-
-.remove-button {
-  font-size: 20px; /* Make the minus sign a bit bigger */
+  position: relative;
+  overflow: hidden;
 }
 
 .visibility-button:hover {
@@ -190,6 +209,52 @@
   color: #fff;
 }
 
+.remove-button.confirming {
+    background-color: #d32f2f; /* A persistent, obvious red */
+    font-size: 16px; /* Checkmark might need a different size */
+}
+
+.remove-button.confirming:hover {
+    background-color: #f44336; /* A slightly brighter red on hover */
+}
+
+.remove-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.remove-button:disabled:hover {
+    background-color: #555; /* Prevents hover color change when disabled */
+}
+
+.remove-button.confirming:disabled {
+    background-color: #d32f2f;
+}
+
+.remove-button.confirming:disabled:hover {
+    background-color: #d32f2f;
+}
+
+.remove-button.confirming::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  animation: deplete 3s linear forwards; /* Matches the 3s timeout */
+}
+
+.remove-button span {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  transform-origin: center;
+}
+
+.remove-button.confirming span {
+    animation: shake-and-rest 1s ease-in-out infinite;
+}
 
 .control-row {
   display: flex;
