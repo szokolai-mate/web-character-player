@@ -8,10 +8,11 @@ import { MMDLoader } from 'three/examples/jsm/loaders/MMDLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 
-export class ModelLoader {
-    private static readonly LOGPREFIX = '[ModelLoader]';
+class ModelLoader {
+    private static readonly LOGPREFIX = '[ModelLoader] ';
 
     private loader: GLTFLoader;
+    private cache = new Map<string, Promise<[THREE.Object3D[], Record<string, unknown>]>>();
 
     constructor() {
         this.loader = new GLTFLoader();
@@ -21,7 +22,11 @@ export class ModelLoader {
     }
 
     public async load(url: string, type: string = 'GLTF'): Promise<[THREE.Object3D[], Record<string, unknown>]> {
-        return new Promise((resolve, reject) => {
+        if (this.cache.has(url)) {
+            console.log(ModelLoader.LOGPREFIX, `Returning cached model for ${url}`);
+            return this.cache.get(url)!;
+        }
+        const promise = new Promise<[THREE.Object3D[], Record<string, unknown>]>((resolve, reject) => {
             if (type == 'GLTF') {
                 this.loader.load(
                     url,
@@ -71,6 +76,8 @@ export class ModelLoader {
                 );
             }
         });
+        this.cache.set(url, promise);
+        return promise;
     }
 
     private static progressFunctor(progress: ProgressEvent): void {
@@ -81,3 +88,6 @@ export class ModelLoader {
         console.error(ModelLoader.LOGPREFIX + ' Error loading model:', error);
     }
 }
+
+// Singleton: Export a single instance to share the cache across the app
+export const modelLoader = new ModelLoader();

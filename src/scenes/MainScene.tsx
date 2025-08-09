@@ -1,19 +1,16 @@
-import { Suspense, useMemo } from 'react';
-import { ModelLoader } from '../loaders/ModelLoader';
+import { Suspense } from 'react';
 import { Stats, OrbitControls } from '@react-three/drei';
 import CharacterModel from '../character/CharacterModel';
 import { useCharacterStore } from '../store';
+import { useShallow } from 'zustand/shallow';
 
 
 export default function MainScene() {
-    // Select only the array of characters.
-    // This component will only re-render if a character is added or removed.
-    const characters = useCharacterStore((state) => state.characters);
-    // useMemo will cache the promises, preventing re-loading on every render
-    const modelPromises = useMemo(() => {
-        const modelLoader = new ModelLoader();
-        return characters.map(character => modelLoader.load(character.url));
-    }, [characters]);
+    // This selector now only subscribes to the list of character IDs.
+    // MainScene will NOT re-render when a character's settings change.
+    const characterIds = useCharacterStore(
+        useShallow((state) => state.characters.map((c) => c.id))
+    );
     return (
         <group>
             <ambientLight intensity={0.5} color={'white'} />
@@ -28,9 +25,9 @@ export default function MainScene() {
                 <sphereGeometry />
                 <meshStandardMaterial color="green" />
             </mesh>
-            {modelPromises.map((item, index) => (
-                <Suspense fallback={null}>
-                    <CharacterModel key={characters[index].id} id={characters[index].id} modelPromise={item}/>
+            {characterIds.map((id) => (
+                <Suspense fallback={null} key={id}>
+                    <CharacterModel id={id} />
                 </Suspense>
             ))}
             <Stats />

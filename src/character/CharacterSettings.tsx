@@ -1,5 +1,4 @@
 import React from 'react';
-import { CharacterType, CharacterSettings as CharacterSettingsType } from '../types';
 import { useCharacterStore } from '../store';
 import { useShallow } from 'zustand/shallow';
 

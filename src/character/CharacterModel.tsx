@@ -1,39 +1,52 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRef, use } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { VRMCharacter } from '../character/VRMCharacter';
 import { VRMCore } from '@pixiv/three-vrm';
-import { useShallow } from 'zustand/shallow';
 import { useCharacterStore } from '../store';
+import { modelLoader } from '../loaders/ModelLoader';
 
 interface CustomModelProps {
-    modelPromise: Promise<[THREE.Object3D[], Record<string, unknown>]>;
     id: number;
-    // TODO: I may need to separate this display component and control
 }
 
-function CharacterModel({ modelPromise, id }: CustomModelProps) {
-    // use shallow to only rerender if this one character changes
-    const characterState = useCharacterStore(
-        useShallow((state) => state.characters.find((char) => char.id === id)!));
-    const model = use(modelPromise);
+export default function CharacterModel({ id }: CustomModelProps) {
+    // Get the static URL once on initial render. This will not cause re-renders.
+    const url = useCharacterStore.getState().characters.find(c => c.id === id)!.url;
+    // Load the model using the cache-enabled loader.
+    const model = use(modelLoader.load(url));
     const ref = useRef<THREE.Object3D>(null);
-    // TODO: we should probably not construct characters here, I think the now introduced CharacterSettings is also weak
-    const character = new VRMCharacter(model[0][0], model[1].vrm as VRMCore);
-    //TMP
-    const camera = useThree().camera;
-    character.setLookAt(camera);
-    character.setUpInfiniteTalk();
-    character.tweenExpression('happy', 0.5, 5000);
-    // character.playAnimation('assets/animation/action_run.bvh');
-    // character.playAnimation('assets/animation/exercise_jumping_jacks.bvh');
+    // Memoize the VRMCharacter instance so it's only created once per model.
+    // This prevents the "flicker" and state reset.
+    const character = useMemo(() =>
+        // TODO: we should probably not construct characters here, probably put them in store?
+        new VRMCharacter(model[0][0], model[1].vrm as VRMCore), 
+        [model]
+    );
 
     useFrame((state, delta) => {
+        // Get the latest state directly from the store on every frame.
+        // This does NOT trigger a re-render.
+        const characterState = useCharacterStore.getState().characters.find((c) => c.id === id);
+        const position = characterState?.settings.position
+        const scale = characterState?.settings.scale
+        if (position && scale) {
+            ref.current?.position.set(position[0], position[1], position[2]);
+            ref.current?.scale.setScalar(scale);
+        }
         character.update(delta);
     });
 
-    return <primitive object={ character.scene } ref = { ref } position={characterState.settings.position} scale={characterState.settings.scale}/>;
-}
+    useMemo(() => {
+        //TODO: what is this memo?
+        //TMP
+        const camera = useThree().camera;
+        character.setLookAt(camera);
+        character.setUpInfiniteTalk();
+        character.tweenExpression('happy', 0.5, 5000);
+        // character.playAnimation('assets/animation/exercise_jumping_jacks.bvh');
+        // character.playAnimation('assets/animation/action_run.bvh');
+    }, [character]); // Dependency on the memoized character instance
 
-// Memoize the component for an extra layer of performance protection.
-export default React.memo(CharacterModel);
+    return <primitive object={ character.scene } ref = { ref } />;
+}
