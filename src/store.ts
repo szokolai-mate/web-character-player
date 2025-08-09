@@ -12,6 +12,7 @@ export const useCharacterStore = create(
             // ====================================
             // 1. Initial State
             // ====================================
+            isPanelOpen: false,
             characters: [
                 {
                     id: 1,
@@ -93,6 +94,7 @@ export const useCharacterStore = create(
                 set((state) => ({
                     characters: state.characters.filter((char) => char.id !== id),
                 })),
+            togglePanel: () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
         }),
     ),
 );
