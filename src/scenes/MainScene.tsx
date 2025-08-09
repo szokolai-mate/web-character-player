@@ -1,21 +1,19 @@
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { ModelLoader } from '../loaders/ModelLoader';
 import { Stats, OrbitControls } from '@react-three/drei';
 import { CharacterModel } from '../character/CharacterModel';
-import { CharacterType } from '../types';
+import { useCharacterStore } from '../store';
 
-interface MainSceneProps {
-    color: string;
-    characters: CharacterType[];
-    //TODO
-}
 
-export default function MainScene({ color, characters = [] }: MainSceneProps) {
-    const modelLoader = new ModelLoader();
-    const modelPromises = [];
-    for (const character of characters) {
-        modelPromises.push(modelLoader.load(character.url));
-    }
+export default function MainScene() {
+    // Select only the array of characters.
+    // This component will only re-render if a character is added or removed.
+    const characters = useCharacterStore((state) => state.characters);
+    // useMemo will cache the promises, preventing re-loading on every render
+    const modelPromises = useMemo(() => {
+        const modelLoader = new ModelLoader();
+        return characters.map(character => modelLoader.load(character.url));
+    }, [characters]);
     return (
         <group>
             <ambientLight intensity={0.5} color={'white'} />
@@ -28,11 +26,11 @@ export default function MainScene({ color, characters = [] }: MainSceneProps) {
             <axesHelper />
             <mesh scale={[0.01,0.1,0.1]}>
                 <sphereGeometry />
-                <meshStandardMaterial color={color} />
+                <meshStandardMaterial color="green" />
             </mesh>
             {modelPromises.map((item, index) => (
                 <Suspense fallback={null}>
-                    <CharacterModel key={characters[index].id} modelPromise={item} settings={characters[index].settings}/>
+                    <CharacterModel key={characters[index].id} id={characters[index].id} modelPromise={item}/>
                 </Suspense>
             ))}
             <Stats />

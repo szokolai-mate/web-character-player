@@ -1,9 +1,8 @@
 import './style.css';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader, Html } from '@react-three/drei';
 import MainScene from './scenes/MainScene';
-import { CharacterType } from './types';
 import ControlPanel from './scenes/ControlPanel';
 
 /* GOALS:
@@ -44,36 +43,6 @@ import ControlPanel from './scenes/ControlPanel';
 
 
 export default function App() {
-    const [characters, setCharacters] = useState<CharacterType[]>([
-    {
-      id: 1,
-      name: 'Default Character',
-      url: 'assets/HatsuneMikuNT.vrm',
-      settings: {
-        position: [0, 0, 0],
-        scale: 1,
-      },
-    },
-    {
-      id: 2,
-      name: 'Default Character',
-      url: 'assets/Untitled imp.vrm',
-      settings: {
-        position: [2, 0, 0],
-        scale: 1.2,
-      },
-    },
-    {
-      id: 3,
-      name: 'Default Character',
-      url: 'assets/janedoev1.vrm',
-      settings: {
-        position: [-2, 0, 0],
-        scale: 1,
-      },
-    },
-    ]);
-
     return (
         <main>
         <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
@@ -84,14 +53,14 @@ export default function App() {
                     gl.setClearColor('#242424');
                 }}>
                 <Suspense fallback={null}>
-                    <MainScene color='blue' characters={characters}/>
+                    <MainScene/>
                 </Suspense>
                 <Html center>
                     <Loader />
                 </Html>
             </Canvas>
         </div>
-        <ControlPanel characters={characters} setCharacters={setCharacters} />
+        {/* <ControlPanel characters={characters} setCharacters={setCharacters} /> */}
         </main>
     );
 }

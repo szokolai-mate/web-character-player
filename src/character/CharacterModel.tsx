@@ -2,15 +2,19 @@ import { useRef, use } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { VRMCharacter } from '../character/VRMCharacter';
 import { VRMCore } from '@pixiv/three-vrm';
-import { CharacterSettings } from '../types';
+import { useShallow } from 'zustand/shallow';
+import { useCharacterStore } from '../store';
 
 interface CustomModelProps {
     modelPromise: Promise<[THREE.Object3D[], Record<string, unknown>]>;
-    settings: CharacterSettings
+    id: number;
     // TODO: I may need to separate this display component and control
 }
 
-export function CharacterModel({ modelPromise, settings }: CustomModelProps) {
+export function CharacterModel({ modelPromise, id }: CustomModelProps) {
+    // use shallow to only rerender if this one character changes
+    const characterState = useCharacterStore(
+        useShallow((state) => state.characters.find((char) => char.id === id)!));
     const model = use(modelPromise);
     const ref = useRef<THREE.Object3D>(null);
     // TODO: we should probably not construct characters here, I think the now introduced CharacterSettings is also weak
@@ -27,5 +31,5 @@ export function CharacterModel({ modelPromise, settings }: CustomModelProps) {
         character.update(delta);
     });
 
-    return <primitive object={ character.scene } ref = { ref } position = { settings.position } scale = { settings.scale }/>;
+    return <primitive object={ character.scene } ref = { ref } position={characterState.settings.position} scale={characterState.settings.scale}/>;
 }
