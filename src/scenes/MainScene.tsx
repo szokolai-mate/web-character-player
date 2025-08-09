@@ -1,19 +1,20 @@
 import { Suspense } from 'react';
 import { ModelLoader } from '../loaders/ModelLoader';
 import { Stats, OrbitControls } from '@react-three/drei';
-import { CharacterModel } from '../components/CharacterModel';
+import { CharacterModel } from '../character/CharacterModel';
+import { CharacterType } from '../types';
 
 interface MainSceneProps {
     color: string;
-    urls: string[];
+    characters: CharacterType[];
     //TODO
 }
 
-export default function MainScene({ color, urls = [] }: MainSceneProps) {
+export default function MainScene({ color, characters = [] }: MainSceneProps) {
     const modelLoader = new ModelLoader();
     const modelPromises = [];
-    for (const url of urls) {
-        modelPromises.push(modelLoader.load(url));
+    for (const character of characters) {
+        modelPromises.push(modelLoader.load(character.url));
     }
     return (
         <group>
@@ -31,7 +32,7 @@ export default function MainScene({ color, urls = [] }: MainSceneProps) {
             </mesh>
             {modelPromises.map((item, index) => (
                 <Suspense fallback={null}>
-                    <CharacterModel modelPromise={item} position={[2 * index, 0, 0]}/>
+                    <CharacterModel key={characters[index].id} modelPromise={item} settings={characters[index].settings}/>
                 </Suspense>
             ))}
             <Stats />
