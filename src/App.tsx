@@ -1,7 +1,5 @@
 import './style.css';
-import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Loader, Html } from '@react-three/drei';
 import MainScene from './scenes/MainScene';
 import ControlPanel from './scenes/ControlPanel';
 
@@ -52,12 +50,7 @@ export default function App() {
                     onCreated={({ gl }) => {
                         gl.setClearColor('#242424');
                     }}>
-                    <Suspense fallback={null}>
-                        <MainScene/>
-                    </Suspense>
-                    <Html center>
-                        <Loader />
-                    </Html>
+                    <MainScene/>
                 </Canvas>
             </div>
             <ControlPanel/>

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { combine } from 'zustand/middleware';
-import { CharacterType, CharacterSettings } from './types';
+import { CharacterType, CharacterSettings } from './character/types';
 
 //TODO: zustand/middleware/persist
 //TODO: messenger pattern (e.g. for character.playAnimation)

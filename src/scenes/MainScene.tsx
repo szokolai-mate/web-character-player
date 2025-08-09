@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Stats, OrbitControls } from '@react-three/drei';
+import { Stats, OrbitControls, Html, Loader } from '@react-three/drei';
 import CharacterModel from '../character/CharacterModel';
 import { useCharacterStore } from '../store';
 import { useShallow } from 'zustand/shallow';
@@ -30,6 +30,9 @@ export default function MainScene() {
                     <CharacterModel id={id} />
                 </Suspense>
             ))}
+            <Html center>
+                <Loader />
+            </Html>
             <Stats />
         </group>
     );

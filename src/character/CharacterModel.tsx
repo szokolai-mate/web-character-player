@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useRef, use } from 'react';
+import { useRef, use, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { VRMCharacter } from '../character/VRMCharacter';
 import { VRMCore } from '@pixiv/three-vrm';
@@ -13,13 +12,13 @@ interface CustomModelProps {
 export default function CharacterModel({ id }: CustomModelProps) {
     // Get the static URL once on initial render. This will not cause re-renders.
     const url = useCharacterStore.getState().characters.find(c => c.id === id)!.url;
-    // Load the model using the cache-enabled loader.
+    // Load the model using the cache-enabled loader and wait for promise.
     const model = use(modelLoader.load(url));
     const ref = useRef<THREE.Object3D>(null);
     // Memoize the VRMCharacter instance so it's only created once per model.
     // This prevents the "flicker" and state reset.
     const character = useMemo(() =>
-        // TODO: we should probably not construct characters here, probably put them in store?
+        // TODO: we should probably not construct characters here, probably put them in store? => no store, not serializable
         new VRMCharacter(model[0][0], model[1].vrm as VRMCore),
     [model],
     );
