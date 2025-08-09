@@ -1,4 +1,4 @@
-import { useRef, use, useMemo } from 'react';
+import { useRef, use, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { VRMCharacter } from '../character/VRMCharacter';
 import { VRMCore } from '@pixiv/three-vrm';
@@ -31,6 +31,18 @@ export default function CharacterModel({ id }: CustomModelProps) {
         new VRMCharacter(model[0][0], model[1].vrm as VRMCore),
     [model],
     );
+
+    useEffect(() => {
+        //TODO: much more sophisticated system, for example fade-in-out
+        console.log(settings?.activeAnimations)
+        //TMP
+        character.cancelAnimations();
+        if (settings?.activeAnimations && settings.activeAnimations.length > 0) {
+            for (const animation of settings?.activeAnimations) {
+                character.playAnimation(animation.url);
+            }
+        }
+    }, [character, settings?.activeAnimations]);
 
     useFrame((state, delta) => {
         character.update(delta);

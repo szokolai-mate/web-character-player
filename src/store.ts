@@ -32,6 +32,14 @@ export const useCharacterStore = create(
                             position: [2, 0, 0],
                             scale: 1.2,
                             visible: true,
+                            activeAnimations: [
+                                {
+                                    url: 'assets/animation/action_run.bvh',
+                                },
+                                {
+                                    url: 'assets/animation/exercise_jumping_jacks.bvh',
+                                },
+                            ],
                         },
                     },
                     {
@@ -87,6 +95,14 @@ export const useCharacterStore = create(
                                     ...char,
                                     settings: { ...char.settings, visible: !char.settings.visible },
                                 }
+                                : char,
+                        ),
+                    })),
+                updateAnimations: (id: number, json: any) =>
+                    set((state) => ({
+                        characters: state.characters.map((char) =>
+                            char.id === id
+                                ? { ...char, settings: { ...char.settings, activeAnimations: json } }
                                 : char,
                         ),
                     })),

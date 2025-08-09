@@ -51,6 +51,12 @@ export class Character {
         }
     }
 
+    //tmp
+    public cancelAnimations(): void {
+        //TODO cancel current animation(s) => need current state and calculate delta
+        this.animationMixer.stopAllAction();
+    }
+
     protected async loadAnimation(url: string) {
         //TODO: this class should be an interface
     }

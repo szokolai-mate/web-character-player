@@ -9,7 +9,7 @@ interface CharacterSettingsProps {
 function CharacterSettings({ characterId }: CharacterSettingsProps) {
     const character = useCharacterStore(
         useShallow((state) => state.characters.find((char) => char.id === characterId)!));
-    const { updateSetting, updatePosition, removeCharacter, toggleVisibility } = useCharacterStore.getState();
+    const { updateSetting, updatePosition, removeCharacter, toggleVisibility, updateAnimations } = useCharacterStore.getState();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [isDeleteLocked, setIsDeleteLocked] = useState(false);
@@ -72,6 +72,26 @@ function CharacterSettings({ characterId }: CharacterSettingsProps) {
                 </div>
             </h4>
             <div className={`collapsible-content ${isCollapsed ? 'collapsed' : ''}`}>
+                <div className="control-row">
+                    <label>Animation URL</label>
+                    <div className="input-group">
+                        <input
+                            type="text"
+                            value={JSON.stringify(character.settings.activeAnimations)}
+                            onChange={(e) => {
+                                try {
+                                    //TODO: i cannot edit this properly, as if it doesnt parse properly, it will not update the store and it will therefore not change
+                                    const parsed = JSON.parse(e.target.value);
+                                    updateAnimations(characterId, parsed);
+                                }
+                                catch {//TODO
+                                }
+                            }}
+                            placeholder="e.g., assets/animation/action_run.bvh"
+                            className="text-input"
+                        />
+                    </div>
+                </div>
                 <div className="control-row">
                     <label>Scale</label>
                     <div className="input-group">
