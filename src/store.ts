@@ -20,6 +20,7 @@ export const useCharacterStore = create(
                     settings: {
                         position: [0, 0, 0],
                         scale: 1,
+                        visible: true,
                     },
                 },
                 {
@@ -29,6 +30,7 @@ export const useCharacterStore = create(
                     settings: {
                         position: [2, 0, 0],
                         scale: 1.2,
+                        visible: true,
                     },
                 },
                 {
@@ -38,6 +40,7 @@ export const useCharacterStore = create(
                     settings: {
                         position: [-2, 0, 0],
                         scale: 1,
+                        visible: true,
                     },
                 },
             ] as CharacterType[], // Type assertion on the initial array helps inference
@@ -74,6 +77,21 @@ export const useCharacterStore = create(
                             settings: { ...char.settings, position: newPosition },
                         };
                     }),
+                })),
+            toggleVisibility: (id: number) =>
+                set((state) => ({
+                    characters: state.characters.map((char) =>
+                        char.id === id
+                            ? {
+                                  ...char,
+                                  settings: { ...char.settings, visible: !char.settings.visible },
+                              }
+                            : char,
+                    ),
+                })),
+            removeCharacter: (id: number) =>
+                set((state) => ({
+                    characters: state.characters.filter((char) => char.id !== id),
                 })),
         }),
     ),
