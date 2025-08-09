@@ -1,7 +1,7 @@
 import { Suspense, useMemo } from 'react';
 import { ModelLoader } from '../loaders/ModelLoader';
 import { Stats, OrbitControls } from '@react-three/drei';
-import { CharacterModel } from '../character/CharacterModel';
+import CharacterModel from '../character/CharacterModel';
 import { useCharacterStore } from '../store';
 
 

@@ -1,23 +1,18 @@
-import React from 'react';
 import CharacterSettings from '../character/CharacterSettings';
-import { CharacterType } from '../types';
 import './ControlPanel.css';
+import { useCharacterStore } from '../store';
 
 
-interface ControlPanelProps {
-    characters: CharacterType[];
-    setCharacters: React.Dispatch<React.SetStateAction<CharacterType[]>>;
-}
 
-export default function ControlPanel({ characters, setCharacters }: ControlPanelProps) {
+export default function ControlPanel() {
+    const characters = useCharacterStore((state) => state.characters);
     return (
         <div className="control-panel">
         <h2>Character Controls</h2>
         {characters.map((character) => (
             <CharacterSettings
             key={character.id}
-            character={character}
-            setCharacters={setCharacters}
+            characterId={character.id}
             />
         ))}
         {/* A button to add new characters could go here in the future */}

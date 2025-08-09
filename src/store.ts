@@ -12,7 +12,7 @@ combine(
       characters: [
         {
       id: 1,
-      name: 'Default Character',
+      name: 'Miku',
       url: 'assets/HatsuneMikuNT.vrm',
       settings: {
         position: [0, 0, 0],
@@ -21,7 +21,7 @@ combine(
     },
     {
       id: 2,
-      name: 'Default Character',
+      name: 'jane v0',
       url: 'assets/Untitled imp.vrm',
       settings: {
         position: [2, 0, 0],
@@ -30,7 +30,7 @@ combine(
     },
     {
       id: 3,
-      name: 'Default Character',
+      name: 'jane v1',
       url: 'assets/janedoev1.vrm',
       settings: {
         position: [-2, 0, 0],

@@ -60,7 +60,7 @@ export default function App() {
                 </Html>
             </Canvas>
         </div>
-        {/* <ControlPanel characters={characters} setCharacters={setCharacters} /> */}
+        <ControlPanel/>
         </main>
     );
 }

@@ -1,27 +1,22 @@
 import React from 'react';
 import { CharacterType, CharacterSettings as CharacterSettingsType } from '../types';
+import { useCharacterStore } from '../store';
+import { useShallow } from 'zustand/shallow';
 
 interface CharacterSettingsProps {
-  character: CharacterType;
-  setCharacters: React.Dispatch<React.SetStateAction<CharacterType[]>>;
+  characterId: number;
 }
 
-export default function CharacterSettings({ character, setCharacters }: CharacterSettingsProps) {
-    const handleSettingChange = (
-        setting: keyof CharacterSettingsType,
-        value: number
-    ) => {
-        setCharacters((prev) =>
-        prev.map((char) =>
-            char.id === character.id
-            ? {
-                ...char,
-                settings: { ...char.settings, [setting]: value },
-                }
-            : char
-        )
-        );
-    };
+function CharacterSettings({ characterId }: CharacterSettingsProps) {
+    const character = useCharacterStore(
+            useShallow((state) => state.characters.find((char) => char.id === characterId)!));
+
+    // Select the actions from the store
+    const { updateSetting, updatePosition } = useCharacterStore.getState();
+    
+    if (!character) {
+      return null;
+    }
 
     return (
     <div className="character-settings-card">
@@ -34,12 +29,46 @@ export default function CharacterSettings({ character, setCharacters }: Characte
           max="3"
           step="0.05"
           value={character.settings.scale}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            handleSettingChange('scale', parseFloat(e.target.value))
-          }
+          onChange={(e) => updateSetting(characterId, 'scale', parseFloat(e.target.value))}
         />
       </div>
-      {/* Add more controls for position, etc. following the same pattern */}
+
+      {/* Position Controls */}
+      <div className="control-row">
+        <label>Position X</label>
+        <input
+          type="range"
+          min={-5}
+          max={5}
+          step="0.1"
+          value={character.settings.position[0]}
+          onChange={(e) => updatePosition(characterId, 0, parseFloat(e.target.value))}
+        />
+      </div>
+      <div className="control-row">
+        <label>Position Y</label>
+        <input
+          type="range"
+          min={-5}
+          max={5}
+          step="0.1"
+          value={character.settings.position[1]}
+          onChange={(e) => updatePosition(characterId, 1, parseFloat(e.target.value))}
+        />
+      </div>
+      <div className="control-row">
+        <label>Position Z</label>
+        <input
+          type="range"
+          min={-5}
+          max={5}
+          step="0.1"
+          value={character.settings.position[2]}
+          onChange={(e) => updatePosition(characterId, 2, parseFloat(e.target.value))}
+        />
+      </div>
     </div>
   );
 }
+
+export default React.memo(CharacterSettings);

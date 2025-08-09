@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef, use } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { VRMCharacter } from '../character/VRMCharacter';
@@ -11,7 +12,7 @@ interface CustomModelProps {
     // TODO: I may need to separate this display component and control
 }
 
-export function CharacterModel({ modelPromise, id }: CustomModelProps) {
+function CharacterModel({ modelPromise, id }: CustomModelProps) {
     // use shallow to only rerender if this one character changes
     const characterState = useCharacterStore(
         useShallow((state) => state.characters.find((char) => char.id === id)!));
@@ -33,3 +34,6 @@ export function CharacterModel({ modelPromise, id }: CustomModelProps) {
 
     return <primitive object={ character.scene } ref = { ref } position={characterState.settings.position} scale={characterState.settings.scale}/>;
 }
+
+// Memoize the component for an extra layer of performance protection.
+export default React.memo(CharacterModel);
