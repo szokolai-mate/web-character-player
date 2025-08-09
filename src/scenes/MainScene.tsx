@@ -9,7 +9,7 @@ export default function MainScene() {
     // This selector now only subscribes to the list of character IDs.
     // MainScene will NOT re-render when a character's settings change.
     const characterIds = useCharacterStore(
-        useShallow((state) => state.characters.map((c) => c.id))
+        useShallow((state) => state.characters.map((c) => c.id)),
     );
     return (
         <group>

@@ -12,7 +12,7 @@ export default {
     output: {
         path: path.join(__dirname, 'dist/'),
         filename: 'index.js',
-        clean: true
+        clean: true,
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],

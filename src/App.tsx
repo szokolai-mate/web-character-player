@@ -45,22 +45,22 @@ import ControlPanel from './scenes/ControlPanel';
 export default function App() {
     return (
         <main>
-        <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-            <Canvas
-                camera={{ position: [0, 2, 2], fov: 75 }}
-                gl={{ antialias: true, alpha: true }}
-                onCreated={({ gl }) => {
-                    gl.setClearColor('#242424');
-                }}>
-                <Suspense fallback={null}>
-                    <MainScene/>
-                </Suspense>
-                <Html center>
-                    <Loader />
-                </Html>
-            </Canvas>
-        </div>
-        <ControlPanel/>
+            <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
+                <Canvas
+                    camera={{ position: [0, 2, 2], fov: 75 }}
+                    gl={{ antialias: true, alpha: true }}
+                    onCreated={({ gl }) => {
+                        gl.setClearColor('#242424');
+                    }}>
+                    <Suspense fallback={null}>
+                        <MainScene/>
+                    </Suspense>
+                    <Html center>
+                        <Loader />
+                    </Html>
+                </Canvas>
+            </div>
+            <ControlPanel/>
         </main>
     );
 }
