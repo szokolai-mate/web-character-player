@@ -301,10 +301,21 @@
   padding-top: 5px;
 }
 
+.control-row-divider {
+    border: 0;
+    border-top: 1px solid #4a4a4a;
+    margin: 15px 0;
+}
+
 .control-row label {
-  margin-right: 10px;
-  font-size: 14px;
-  flex-shrink: 0;
+    margin-right: 10px;
+    font-size: 14px;
+    flex-shrink: 0;
+    width: 90px; /* Give labels a fixed width */
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add '...' for long text */
+    text-align: left; /* Ensure text is left-aligned */
 }
 
 .input-group {

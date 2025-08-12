@@ -183,11 +183,11 @@ function CharacterSettings({ characterId }: CharacterSettingsProps) {
                     </div>
                 </div>
                 {character.availableExpressions && character.availableExpressions.length > 0 && (
-                    <div className="control-row-divider">Expressions</div>
+                    <hr className="control-row-divider" />
                 )}
                 {character.availableExpressions?.map((expressionName) => (
                     <div className="control-row" key={expressionName}>
-                        <label>{expressionName}</label>
+                        <label title={expressionName}>{expressionName}</label>
                         <div className="input-group">
                             <input
                                 type="range"
