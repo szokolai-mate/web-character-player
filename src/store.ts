@@ -106,6 +106,23 @@ export const useCharacterStore = create(
                                 : char,
                         ),
                     })),
+                setAvailableExpressions: (id: number, expressions: string[]) =>
+                    set((state) => ({
+                        characters: state.characters.map((char) =>
+                            char.id === id ? { ...char, availableExpressions: expressions } : char,
+                        ),
+                    })),
+                updateExpression: (id: number, name: string, value: number) =>
+                    set((state) => ({
+                        characters: state.characters.map((char) => {
+                            if (char.id !== id) return char;
+                            const newExpressions = { ...(char.settings.activeExpressions || {}), [name]: value };
+                            return {
+                                ...char,
+                                settings: { ...char.settings, activeExpressions: newExpressions },
+                            };
+                        }),
+                    })),
                 removeCharacter: (id: number) =>
                     set((state) => ({
                         characters: state.characters.filter((char) => char.id !== id),

@@ -206,8 +206,8 @@
 .collapsible-content {
   overflow: hidden;
   transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out,
-    padding-top 0.35s ease-in-out;
-  max-height: 500px; /* Set to a value larger than content will ever be */
+  padding-top 0.35s ease-in-out;
+  max-height: 100%; /* Set to a value larger than content will ever be */
   opacity: 1;
   padding-top: 15px; /* Add space between header and content when open */
 }

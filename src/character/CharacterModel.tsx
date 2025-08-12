@@ -11,6 +11,7 @@ interface CustomModelProps {
 }
 
 export default function CharacterModel({ id }: CustomModelProps) {
+    const { setAvailableExpressions } = useCharacterStore.getState();
     // Get the whole character object.
     const characterState = useCharacterStore.getState().characters.find((c) => c.id === id);
     if (!characterState) return null;
@@ -34,7 +35,6 @@ export default function CharacterModel({ id }: CustomModelProps) {
 
     useEffect(() => {
         //TODO: much more sophisticated system, for example fade-in-out
-        console.log(settings?.activeAnimations)
         //TMP
         character.cancelAnimations();
         if (settings?.activeAnimations && settings.activeAnimations.length > 0) {
@@ -42,7 +42,12 @@ export default function CharacterModel({ id }: CustomModelProps) {
                 character.playAnimation(animation.url);
             }
         }
-    }, [character, settings?.activeAnimations]);
+        if (settings?.activeExpressions) {
+            for (const [name, value] of Object.entries(settings.activeExpressions)) {
+                character.setExpression(name, value);
+            }
+        }
+    }, [character, settings?.activeAnimations, settings?.activeExpressions]);
 
     useFrame((state, delta) => {
         character.update(delta);
@@ -58,8 +63,9 @@ export default function CharacterModel({ id }: CustomModelProps) {
     useMemo(() => {
         //TMP
         character.setLookAt(camera);
-        character.setUpInfiniteTalk();
-        character.tweenExpression('happy', 0.5, 5000);
+        //character.setUpInfiniteTalk();
+        setAvailableExpressions(id, Object.keys(character.getAvailableExpressions()));
+        // character.tweenExpression('happy', 0.5, 5000);
         // character.playAnimation('assets/animation/exercise_jumping_jacks.bvh');
         // character.playAnimation('assets/animation/action_run.bvh');
     }, [character, camera]); // Dependency on the memoized character instance

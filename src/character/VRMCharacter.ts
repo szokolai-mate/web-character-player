@@ -77,6 +77,23 @@ export class VRMCharacter extends Character {
         //TODO error
     }
 
+    public setExpression(name: string, weight: number): void {
+        if (this.vrm.expressionManager) {
+            const expression = this.vrm.expressionManager.getExpression(name);
+            if (expression) {
+                expression.weight = weight;
+            }
+        }
+        //TODO error
+    }
+
+    public getAvailableExpressions() {
+        if (this.vrm.expressionManager) {
+            return this.vrm.expressionManager.expressionMap;
+        }
+        else return {};
+    }
+
     protected override async loadAnimation(url: string) {
         //TODO error
         this.loadedAnimations.push(await this.animationLoader.BHVforVRM(url, this.vrm));

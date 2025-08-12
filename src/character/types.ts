@@ -2,7 +2,8 @@ export interface CharacterSettings {
   position: [number, number, number];
   scale: number;
   visible: boolean;
-  activeAnimations: AnimationSettings[]; 
+  activeAnimations: AnimationSettings[];
+  activeExpressions?: { [key: string]: number };
 }
 
 export interface AnimationSettings {
@@ -18,4 +19,5 @@ export interface CharacterType {
   name: string;
   url: string;
   settings: CharacterSettings;
+  availableExpressions?: string[];
 }

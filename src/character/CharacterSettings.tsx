@@ -9,7 +9,7 @@ interface CharacterSettingsProps {
 function CharacterSettings({ characterId }: CharacterSettingsProps) {
     const character = useCharacterStore(
         useShallow((state) => state.characters.find((char) => char.id === characterId)!));
-    const { updateSetting, updatePosition, removeCharacter, toggleVisibility, updateAnimations } = useCharacterStore.getState();
+    const { updateSetting, updatePosition, removeCharacter, toggleVisibility, updateAnimations, updateExpression } = useCharacterStore.getState();
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [isDeleteLocked, setIsDeleteLocked] = useState(false);
@@ -182,6 +182,37 @@ function CharacterSettings({ characterId }: CharacterSettingsProps) {
                         />
                     </div>
                 </div>
+                {character.availableExpressions && character.availableExpressions.length > 0 && (
+                    <div className="control-row-divider">Expressions</div>
+                )}
+                {character.availableExpressions?.map((expressionName) => (
+                    <div className="control-row" key={expressionName}>
+                        <label>{expressionName}</label>
+                        <div className="input-group">
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={character.settings.activeExpressions?.[expressionName] ?? 0}
+                                onChange={(e) =>
+                                    updateExpression(characterId, expressionName, parseFloat(e.target.value))
+                                }
+                            />
+                            <input
+                                type="number"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={character.settings.activeExpressions?.[expressionName] ?? 0}
+                                onChange={(e) =>
+                                    updateExpression(characterId, expressionName, parseFloat(e.target.value))
+                                }
+                                className="number-input"
+                            />
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
