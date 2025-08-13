@@ -7,6 +7,7 @@ export class VRMCharacter extends Character {
     protected vrm: VRMCore;
     // TODO: must be determined by setting or active expressions
     protected minBlink: number = 0.0;
+    private smoothedTargetQuat = new THREE.Quaternion();
 
     constructor(scene: THREE.Object3D, vrm: VRMCore) {
         super(scene);
@@ -14,6 +15,10 @@ export class VRMCharacter extends Character {
         this.setUpMouthTweens();
         this.setUpBlinking();
         this.unTPose();
+        const head = this.vrm.humanoid?.getNormalizedBoneNode('head');
+        if (head) {
+            this.smoothedTargetQuat.copy(head.quaternion);
+        }
     }
 
     public override update(dT: number): void {
@@ -54,10 +59,15 @@ export class VRMCharacter extends Character {
             const y180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
             targetLocalQuat.multiply(y180);
         }
-
-        const slerpFactor = 0.07;
-        head.quaternion.slerp(targetLocalQuat, slerpFactor);
-
+        // 1. Smoothly move the proxy target towards the actual target rotation.
+        // A smaller factor here makes the movement feel more "weighted".
+        const proxySlerpFactor = 0.1;
+        this.smoothedTargetQuat.slerp(targetLocalQuat, proxySlerpFactor);
+        // 2. Slerp the head's actual quaternion towards the smoothed proxy target.
+        // A larger factor here makes the head track the proxy more tightly.
+        const headSlerpFactor = 0.25;
+        head.quaternion.slerp(this.smoothedTargetQuat, headSlerpFactor);
+        
         const euler = new THREE.Euler().setFromQuaternion(head.quaternion, 'YXZ');
         euler.x = Math.max(Math.PI * -0.25, Math.min(Math.PI * 0.15, euler.x));
         euler.y = Math.max(Math.PI * -0.4, Math.min(Math.PI * 0.4, euler.y));
