@@ -8,6 +8,12 @@ export class VRMCharacter extends Character {
     // TODO: must be determined by setting or active expressions
     protected minBlink: number = 0.0;
     private smoothedTargetQuat = new THREE.Quaternion();
+    private idleTime = 0.0;
+    private saccadeTargetQuat = new THREE.Quaternion();
+    private smoothedProxyQuat = new THREE.Quaternion();
+    private microSaccadeTimer = 0.0;
+    private macroSaccadeTimer = 0.0;
+    private headSlerpFactor = 0.25;
 
     constructor(scene: THREE.Object3D, vrm: VRMCore) {
         super(scene);
@@ -17,7 +23,8 @@ export class VRMCharacter extends Character {
         this.unTPose();
         const head = this.vrm.humanoid?.getNormalizedBoneNode('head');
         if (head) {
-            this.smoothedTargetQuat.copy(head.quaternion);
+            this.saccadeTargetQuat.copy(head.quaternion);
+            this.smoothedProxyQuat.copy(head.quaternion);
         }
     }
 
@@ -25,6 +32,9 @@ export class VRMCharacter extends Character {
         super.update(dT);
         this.vrm.update(dT);
         this.updateHeadLookAt();
+        this.idleTime += dT;
+        this.microSaccadeTimer -= dT;
+        this.macroSaccadeTimer -= dT;
     }
 
     private updateHeadLookAt(): void {
@@ -38,6 +48,56 @@ export class VRMCharacter extends Character {
             return;
         }
 
+        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
+        // Check for a major readjustment (rarer, bigger movement)
+        if (this.macroSaccadeTimer <= 0.0) {
+            this.macroSaccadeTimer = 7.0 + Math.random() * 8.0; // every 7-15 seconds
+            // A macro movement should delay the next micro movement
+            this.microSaccadeTimer = 1.5 + Math.random() * 4.0;
+            // Set a new random speed for this movement
+            this.headSlerpFactor = 0.01 + Math.random() * 0.15; // Slow to medium speeds
+            // Add a large random offset for a major gaze shift
+            const randomEuler = new THREE.Euler(
+                (Math.random() - 0.5) * 0.2,
+                (Math.random() - 0.5) * 0.6, // Wider horizontal shift
+                0,
+                'YXZ'
+            );
+            this.saccadeTargetQuat.copy(targetLocalQuat).multiply(new THREE.Quaternion().setFromEuler(randomEuler));
+        }
+        // Check for a minor adjustment (common, smaller movement)
+        else if (this.microSaccadeTimer <= 0.0) {
+            this.microSaccadeTimer = 1.0 + Math.random() * 2.0; // every 1-2 seconds
+            this.headSlerpFactor = 0.4; // Consistently quick
+            // Add a small random offset for a minor fidget
+            const randomEuler = new THREE.Euler(
+                (Math.random() - 0.5) * 0.10,
+                (Math.random() - 0.5) * 0.12,
+                0,
+                'YXZ'
+            );
+            this.saccadeTargetQuat.copy(targetLocalQuat).multiply(new THREE.Quaternion().setFromEuler(randomEuler));
+        }
+
+        // --- Two-Stage Smoothing ---
+        // 1. Proxy smoothly chases the saccade target
+        this.smoothedProxyQuat.slerp(this.saccadeTargetQuat, 0.1);
+        // 2. Head chases the proxy at the determined speed
+        head.quaternion.slerp(this.smoothedProxyQuat, this.headSlerpFactor);
+
+        // --- Final Layers and Constraints ---
+        const euler = new THREE.Euler().setFromQuaternion(head.quaternion, 'YXZ');
+        const noiseMagnitudeX = 0.002, noiseMagnitudeY = 0.003;
+        const noiseSpeedX = 0.7, noiseSpeedY = 0.5;
+        euler.x += Math.sin(this.idleTime * noiseSpeedX) * noiseMagnitudeX;
+        euler.y += Math.sin(this.idleTime * noiseSpeedY) * noiseMagnitudeY;
+        euler.x = Math.max(Math.PI * -0.25, Math.min(Math.PI * 0.15, euler.x));
+        euler.y = Math.max(Math.PI * -0.4, Math.min(Math.PI * 0.4, euler.y));
+        euler.z = 0;
+        head.quaternion.setFromEuler(euler);
+    }
+    
+    private calculateTargetLocalQuat(target: THREE.Object3D, head: THREE.Object3D): THREE.Quaternion {
         const targetWorldPos = new THREE.Vector3();
         target.getWorldPosition(targetWorldPos);
 
@@ -48,31 +108,16 @@ export class VRMCharacter extends Character {
         const targetWorldQuat = new THREE.Quaternion().setFromRotationMatrix(lookAtMatrix);
 
         const parentWorldQuat = new THREE.Quaternion();
-        head.parent.getWorldQuaternion(parentWorldQuat);
+        head.parent!.getWorldQuaternion(parentWorldQuat);
         const parentWorldQuatInv = parentWorldQuat.clone().invert();
 
         const targetLocalQuat = parentWorldQuatInv.multiply(targetWorldQuat);
 
-        // VRM 0.0 models have a different coordinate system.
-        // We need to apply a 180-degree rotation on the Y-axis.
         if (this.vrm.meta?.metaVersion !== '1') {
             const y180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
             targetLocalQuat.multiply(y180);
         }
-        // 1. Smoothly move the proxy target towards the actual target rotation.
-        // A smaller factor here makes the movement feel more "weighted".
-        const proxySlerpFactor = 0.1;
-        this.smoothedTargetQuat.slerp(targetLocalQuat, proxySlerpFactor);
-        // 2. Slerp the head's actual quaternion towards the smoothed proxy target.
-        // A larger factor here makes the head track the proxy more tightly.
-        const headSlerpFactor = 0.25;
-        head.quaternion.slerp(this.smoothedTargetQuat, headSlerpFactor);
-        
-        const euler = new THREE.Euler().setFromQuaternion(head.quaternion, 'YXZ');
-        euler.x = Math.max(Math.PI * -0.25, Math.min(Math.PI * 0.15, euler.x));
-        euler.y = Math.max(Math.PI * -0.4, Math.min(Math.PI * 0.4, euler.y));
-        euler.z = 0;
-        head.quaternion.setFromEuler(euler);
+        return targetLocalQuat;
     }
 
     /**
