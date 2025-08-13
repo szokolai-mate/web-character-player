@@ -7,7 +7,6 @@ export class VRMCharacter extends Character {
     protected vrm: VRMCore;
     // TODO: must be determined by setting or active expressions
     protected minBlink: number = 0.0;
-    private smoothedTargetQuat = new THREE.Quaternion();
     private idleTime = 0.0;
     private saccadeOffsetQuat  = new THREE.Quaternion();
     private smoothedProxyQuat = new THREE.Quaternion();
@@ -46,7 +45,30 @@ export class VRMCharacter extends Character {
         if (!head || !head.parent) {
             return;
         }
-
+        // Define the full bone chain and their contribution factors.
+        const bodyBones = [
+            { bone: this.vrm.humanoid.getNormalizedBoneNode('hips'), factor: 0.2 },
+            { bone: this.vrm.humanoid.getNormalizedBoneNode('spine'), factor: 0.3 },
+            { bone: this.vrm.humanoid.getNormalizedBoneNode('chest'), factor: 0.35 },
+            { bone: this.vrm.humanoid.getNormalizedBoneNode('neck'), factor: 0.15 }
+        ].filter(item => item.bone); // Filter out any bones the model might not have
+        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
+        const totalYaw = new THREE.Euler().setFromQuaternion(targetLocalQuat, 'YXZ').y;
+        const comfortZone = Math.PI * 0.16; // Approx 30 degrees
+        const bodySlerpFactor = 0.08;
+        // Distribute the rotation across the bone chain.
+        for (const { bone, factor } of bodyBones) {
+            if (!bone) continue;
+            if (Math.abs(totalYaw) > comfortZone) {
+                // Each bone gets a small, independent rotation based on its factor. These will cascade and add up.
+                const boneYaw = totalYaw * factor;
+                const boneTargetRot = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, boneYaw, 0, 'YXZ'));
+                bone.quaternion.slerp(boneTargetRot, bodySlerpFactor);
+            } else {
+                // Slerp back to neutral if the target is in the comfort zone.
+                bone.quaternion.slerp(new THREE.Quaternion(), bodySlerpFactor);
+            }
+        }
         let randomEuler: THREE.Euler;
         // Check for a major readjustment (rarer, bigger movement)
         if (this.macroSaccadeTimer <= 0.0) {
@@ -88,16 +110,11 @@ export class VRMCharacter extends Character {
             );
             this.saccadeOffsetQuat.setFromEuler(randomEuler);
         }
-
-        // --- Core Tracking Logic ---
-        // 1. Calculate the "perfect" rotation towards the target in every frame.
-        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
-        // 2. Apply our stored offset to create the final saccade target.
+        // Apply our stored offset to create the final saccade target.
         const finalTargetQuat = targetLocalQuat.multiply(this.saccadeOffsetQuat);
-        // --- Two-Stage Smoothing ---
-        // 3. Proxy smoothly chases the final target
+        // Proxy smoothly chases the final target
         this.smoothedProxyQuat.slerp(finalTargetQuat, 0.1);
-        // 4. Head chases the proxy at the determined speed
+        // Head chases the proxy at the determined speed
         head.quaternion.slerp(this.smoothedProxyQuat, this.headSlerpFactor);
         // --- Final Layers and Constraints ---
         const euler = new THREE.Euler().setFromQuaternion(head.quaternion, 'YXZ');
