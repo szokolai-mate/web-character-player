@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Character } from './Character';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { VRMCore } from '@pixiv/three-vrm';
@@ -18,6 +19,50 @@ export class VRMCharacter extends Character {
     public override update(dT: number): void {
         super.update(dT);
         this.vrm.update(dT);
+        this.updateHeadLookAt();
+    }
+
+    private updateHeadLookAt(): void {
+        const target = this.vrm.lookAt?.target;
+        if (!target || !this.vrm.humanoid) {
+            return;
+        }
+
+        const head = this.vrm.humanoid.getNormalizedBoneNode('head');
+        if (!head || !head.parent) {
+            return;
+        }
+
+        const targetWorldPos = new THREE.Vector3();
+        target.getWorldPosition(targetWorldPos);
+
+        const headWorldPos = new THREE.Vector3();
+        head.getWorldPosition(headWorldPos);
+
+        const lookAtMatrix = new THREE.Matrix4().lookAt(targetWorldPos, headWorldPos, new THREE.Vector3(0, 1, 0));
+        const targetWorldQuat = new THREE.Quaternion().setFromRotationMatrix(lookAtMatrix);
+
+        const parentWorldQuat = new THREE.Quaternion();
+        head.parent.getWorldQuaternion(parentWorldQuat);
+        const parentWorldQuatInv = parentWorldQuat.clone().invert();
+
+        const targetLocalQuat = parentWorldQuatInv.multiply(targetWorldQuat);
+
+        // VRM 0.0 models have a different coordinate system.
+        // We need to apply a 180-degree rotation on the Y-axis.
+        if (this.vrm.meta?.metaVersion !== '1') {
+            const y180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+            targetLocalQuat.multiply(y180);
+        }
+
+        const slerpFactor = 0.07;
+        head.quaternion.slerp(targetLocalQuat, slerpFactor);
+
+        const euler = new THREE.Euler().setFromQuaternion(head.quaternion, 'YXZ');
+        euler.x = Math.max(Math.PI * -0.25, Math.min(Math.PI * 0.15, euler.x));
+        euler.y = Math.max(Math.PI * -0.4, Math.min(Math.PI * 0.4, euler.y));
+        euler.z = 0;
+        head.quaternion.setFromEuler(euler);
     }
 
     /**
