@@ -9,7 +9,7 @@ export class VRMCharacter extends Character {
     protected minBlink: number = 0.0;
     private smoothedTargetQuat = new THREE.Quaternion();
     private idleTime = 0.0;
-    private saccadeTargetQuat = new THREE.Quaternion();
+    private saccadeOffsetQuat  = new THREE.Quaternion();
     private smoothedProxyQuat = new THREE.Quaternion();
     private microSaccadeTimer = 0.0;
     private macroSaccadeTimer = 0.0;
@@ -23,7 +23,6 @@ export class VRMCharacter extends Character {
         this.unTPose();
         const head = this.vrm.humanoid?.getNormalizedBoneNode('head');
         if (head) {
-            this.saccadeTargetQuat.copy(head.quaternion);
             this.smoothedProxyQuat.copy(head.quaternion);
         }
     }
@@ -48,43 +47,58 @@ export class VRMCharacter extends Character {
             return;
         }
 
-        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
+        let randomEuler: THREE.Euler;
         // Check for a major readjustment (rarer, bigger movement)
         if (this.macroSaccadeTimer <= 0.0) {
-            this.macroSaccadeTimer = 7.0 + Math.random() * 8.0; // every 7-15 seconds
+            this.macroSaccadeTimer = 7.0 + Math.random() * 8.0;
             // A macro movement should delay the next micro movement
             this.microSaccadeTimer = 1.5 + Math.random() * 4.0;
-            // Set a new random speed for this movement
-            this.headSlerpFactor = 0.01 + Math.random() * 0.15; // Slow to medium speeds
+            this.headSlerpFactor = 0.01 + Math.random() * 0.15;
             // Add a large random offset for a major gaze shift
-            const randomEuler = new THREE.Euler(
+            randomEuler = new THREE.Euler(
                 (Math.random() - 0.5) * 0.2,
-                (Math.random() - 0.5) * 0.6, // Wider horizontal shift
-                0,
+                (Math.random() - 0.5) * 0.6,
+                (Math.random() - 0.5) * 0.05,
                 'YXZ'
             );
-            this.saccadeTargetQuat.copy(targetLocalQuat).multiply(new THREE.Quaternion().setFromEuler(randomEuler));
+            // Add a chance for a rare head tilt
+            if (Math.random() < 0.3) {
+                // dampen XY for tilt
+                randomEuler.x *= 0.6;
+                randomEuler.y *= 0.6;
+                randomEuler.z = (Math.random() - 0.5) * 0.25;
+                if (randomEuler.z < 0) {
+                    randomEuler.z -= 0.12;
+                }
+                else {
+                    randomEuler.z += 0.12;
+                }
+            }
+            this.saccadeOffsetQuat.setFromEuler(randomEuler);
         }
         // Check for a minor adjustment (common, smaller movement)
         else if (this.microSaccadeTimer <= 0.0) {
-            this.microSaccadeTimer = 1.0 + Math.random() * 2.0; // every 1-2 seconds
-            this.headSlerpFactor = 0.4; // Consistently quick
-            // Add a small random offset for a minor fidget
-            const randomEuler = new THREE.Euler(
+            this.microSaccadeTimer = 1.0 + Math.random() * 2.0;
+            this.headSlerpFactor = 0.4;
+            randomEuler = new THREE.Euler(
                 (Math.random() - 0.5) * 0.10,
                 (Math.random() - 0.5) * 0.12,
                 0,
                 'YXZ'
             );
-            this.saccadeTargetQuat.copy(targetLocalQuat).multiply(new THREE.Quaternion().setFromEuler(randomEuler));
+            this.saccadeOffsetQuat.setFromEuler(randomEuler);
         }
 
+        // --- Core Tracking Logic ---
+        // 1. Calculate the "perfect" rotation towards the target in every frame.
+        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
+        // 2. Apply our stored offset to create the final saccade target.
+        const finalTargetQuat = targetLocalQuat.multiply(this.saccadeOffsetQuat);
         // --- Two-Stage Smoothing ---
-        // 1. Proxy smoothly chases the saccade target
-        this.smoothedProxyQuat.slerp(this.saccadeTargetQuat, 0.1);
-        // 2. Head chases the proxy at the determined speed
+        // 3. Proxy smoothly chases the final target
+        this.smoothedProxyQuat.slerp(finalTargetQuat, 0.1);
+        // 4. Head chases the proxy at the determined speed
         head.quaternion.slerp(this.smoothedProxyQuat, this.headSlerpFactor);
-
         // --- Final Layers and Constraints ---
         const euler = new THREE.Euler().setFromQuaternion(head.quaternion, 'YXZ');
         const noiseMagnitudeX = 0.002, noiseMagnitudeY = 0.003;
@@ -93,7 +107,7 @@ export class VRMCharacter extends Character {
         euler.y += Math.sin(this.idleTime * noiseSpeedY) * noiseMagnitudeY;
         euler.x = Math.max(Math.PI * -0.25, Math.min(Math.PI * 0.15, euler.x));
         euler.y = Math.max(Math.PI * -0.4, Math.min(Math.PI * 0.4, euler.y));
-        euler.z = 0;
+        euler.z = Math.max(Math.PI * -0.07, Math.min(Math.PI * 0.07, euler.z));
         head.quaternion.setFromEuler(euler);
     }
     
