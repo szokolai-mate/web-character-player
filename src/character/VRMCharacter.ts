@@ -3,16 +3,24 @@ import { Character } from './Character';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { VRMCore } from '@pixiv/three-vrm';
 
+// TODO: major refactoring
+// TODO: procedural eye target animations
+// TODO: procedural pupil animations?
+// TODO: procedural breathing?
+// TODO: maybe procedural pose adjustments, like cocked hips?
+// TODO: mixing procedural animation with loaded animations
+
 export class VRMCharacter extends Character {
     protected vrm: VRMCore;
     // TODO: must be determined by setting or active expressions
     protected minBlink: number = 0.0;
     private idleTime = 0.0;
-    private saccadeOffsetQuat  = new THREE.Quaternion();
+    private saccadeOffsetQuat = new THREE.Quaternion();
     private smoothedProxyQuat = new THREE.Quaternion();
     private microSaccadeTimer = 0.0;
     private macroSaccadeTimer = 0.0;
     private headSlerpFactor = 0.25;
+    private isBodyEngaged = false;
 
     constructor(scene: THREE.Object3D, vrm: VRMCore) {
         super(scene);
@@ -45,6 +53,25 @@ export class VRMCharacter extends Character {
         if (!head || !head.parent) {
             return;
         }
+        // Body Rotation First
+        const hips = this.vrm.humanoid.getNormalizedBoneNode('hips');
+        let bodyYaw = 0;
+        if (hips) {
+            // VRM 1.0 and 0.0 have different coordinate systems.
+            const modelForward = this.vrm.meta?.metaVersion === '1'
+                ? new THREE.Vector3(0, 0, 1)
+                : new THREE.Vector3(0, 0, -1);
+            const hipsForward = modelForward.applyQuaternion(hips.getWorldQuaternion(new THREE.Quaternion()));
+            const targetDirection = target.getWorldPosition(new THREE.Vector3()).sub(hips.getWorldPosition(new THREE.Vector3()));
+            hipsForward.y = 0;
+            targetDirection.y = 0;
+            hipsForward.normalize();
+            targetDirection.normalize();
+            // Calculate the signed angle between the hips' forward direction and the target
+            const angle = hipsForward.angleTo(targetDirection);
+            const sign = hipsForward.cross(targetDirection).y > 0 ? 1 : -1;
+            bodyYaw = angle * sign;
+        }
         // Define the full bone chain and their contribution factors.
         const bodyBones = [
             { bone: this.vrm.humanoid.getNormalizedBoneNode('hips'), factor: 0.2 },
@@ -52,16 +79,20 @@ export class VRMCharacter extends Character {
             { bone: this.vrm.humanoid.getNormalizedBoneNode('chest'), factor: 0.35 },
             { bone: this.vrm.humanoid.getNormalizedBoneNode('neck'), factor: 0.15 }
         ].filter(item => item.bone); // Filter out any bones the model might not have
-        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
-        const totalYaw = new THREE.Euler().setFromQuaternion(targetLocalQuat, 'YXZ').y;
-        const comfortZone = Math.PI * 0.16; // Approx 30 degrees
+        const engageThreshold = Math.PI * 0.16;    // Threshold to START turning (30 deg)
+        const disengageThreshold = engageThreshold * 0.7; // Threshold to STOP turning (21 deg)
         const bodySlerpFactor = 0.08;
+        if (!this.isBodyEngaged && Math.abs(bodyYaw) > engageThreshold) {
+            this.isBodyEngaged = true;
+        } else if (this.isBodyEngaged && Math.abs(bodyYaw) < disengageThreshold) {
+            this.isBodyEngaged = false;
+        }
         // Distribute the rotation across the bone chain.
         for (const { bone, factor } of bodyBones) {
             if (!bone) continue;
-            if (Math.abs(totalYaw) > comfortZone) {
+            if (this.isBodyEngaged) {
                 // Each bone gets a small, independent rotation based on its factor. These will cascade and add up.
-                const boneYaw = totalYaw * factor;
+                const boneYaw = bodyYaw * factor;
                 const boneTargetRot = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, boneYaw, 0, 'YXZ'));
                 bone.quaternion.slerp(boneTargetRot, bodySlerpFactor);
             } else {
@@ -69,6 +100,8 @@ export class VRMCharacter extends Character {
                 bone.quaternion.slerp(new THREE.Quaternion(), bodySlerpFactor);
             }
         }
+        // Now that the body has rotated, recalculate the head's remaining work.
+        const targetLocalQuat = this.calculateTargetLocalQuat(target, head);
         let randomEuler: THREE.Euler;
         // Check for a major readjustment (rarer, bigger movement)
         if (this.macroSaccadeTimer <= 0.0) {
